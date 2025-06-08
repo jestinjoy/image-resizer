@@ -42,9 +42,7 @@ const drawWithBlurredBackground = (canvas, img, targetWidth, targetHeight) => {
   ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
 };
 
-const InstagramConverter = ({ image }) => {
-  const [previewUrl, setPreviewUrl] = useState(null);
-
+const InstagramConverter = ({ image, setPreviewUrl }) => {
   React.useEffect(() => {
     const canvas = document.createElement('canvas');
     const img = new Image();
@@ -53,26 +51,25 @@ const InstagramConverter = ({ image }) => {
       setPreviewUrl(canvas.toDataURL());
     };
     img.src = image;
-  }, [image]);
+  }, [image, setPreviewUrl]);
 
   return (
     <div className="card mb-4 shadow">
       <div className="card-body text-center">
-        {previewUrl && (
-          <>
-            <div style={{ width: '100%', maxWidth: '540px', margin: '0 auto' }}>
-              <img src={previewUrl} alt="Instagram Preview" className="img-fluid rounded mb-3 border" style={{ aspectRatio: '4 / 5', width: '100%', objectFit: 'contain' }} />
-            </div>
-          </>
-        )}
+        <div style={{ width: '100%', maxWidth: '540px', margin: '0 auto' }}>
+          <img
+            src={image}
+            alt="Instagram Preview"
+            className="img-fluid rounded mb-3 border"
+            style={{ aspectRatio: '4 / 5', width: '100%', objectFit: 'contain' }}
+          />
+        </div>
       </div>
     </div>
   );
 };
 
-const TVConverter = ({ image }) => {
-  const [previewUrl, setPreviewUrl] = useState(null);
-
+const TVConverter = ({ image, setPreviewUrl }) => {
   React.useEffect(() => {
     const canvas = document.createElement('canvas');
     const img = new Image();
@@ -81,18 +78,19 @@ const TVConverter = ({ image }) => {
       setPreviewUrl(canvas.toDataURL());
     };
     img.src = image;
-  }, [image]);
+  }, [image, setPreviewUrl]);
 
   return (
     <div className="card mb-4 shadow">
       <div className="card-body text-center">
-        {previewUrl && (
-          <>
-            <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>
-              <img src={previewUrl} alt="TV Preview" className="img-fluid rounded mb-3 border" style={{ aspectRatio: '16 / 9', width: '100%', objectFit: 'contain' }} />
-            </div>
-          </>
-        )}
+        <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>
+          <img
+            src={image}
+            alt="TV Preview"
+            className="img-fluid rounded mb-3 border"
+            style={{ aspectRatio: '16 / 9', width: '100%', objectFit: 'contain' }}
+          />
+        </div>
       </div>
     </div>
   );
@@ -102,6 +100,7 @@ const ImageResizer = () => {
   const [image, setImage] = useState(null);
   const [mode, setMode] = useState('');
   const [downloadLabel, setDownloadLabel] = useState('');
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   return (
     <div>
@@ -118,7 +117,14 @@ const ImageResizer = () => {
               Convert portrait posters to Instagram and TV-friendly formats
             </p>
 
-            <ImageUploader onImageLoad={(img) => { setImage(img); setMode(''); }} />
+            <ImageUploader
+              onImageLoad={(img) => {
+                setImage(img);
+                setMode('');
+                setDownloadLabel('');
+                setPreviewUrl(null);
+              }}
+            />
 
             {image && (
               <div className="d-flex justify-content-center gap-3 mb-4">
@@ -143,10 +149,10 @@ const ImageResizer = () => {
               </div>
             )}
 
-            {image && downloadLabel && (
+            {image && previewUrl && downloadLabel && (
               <div className="text-center mb-4">
                 <a
-                  href={downloadLabel === 'Instagram' ? document.querySelector('a[download="instagram-image.png"]')?.href : document.querySelector('a[download="tv-image.png"]')?.href}
+                  href={previewUrl}
                   download={`${downloadLabel.toLowerCase()}-image.png`}
                   className={`btn btn-${downloadLabel === 'Instagram' ? 'primary' : 'success'}`}
                 >
@@ -155,8 +161,12 @@ const ImageResizer = () => {
               </div>
             )}
 
-            {image && mode === 'instagram' && <InstagramConverter image={image} />}
-            {image && mode === 'tv' && <TVConverter image={image} />}
+            {image && mode === 'instagram' && (
+              <InstagramConverter image={image} setPreviewUrl={setPreviewUrl} />
+            )}
+            {image && mode === 'tv' && (
+              <TVConverter image={image} setPreviewUrl={setPreviewUrl} />
+            )}
           </div>
         </div>
       </div>
